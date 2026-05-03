@@ -30,6 +30,10 @@ class ProveedorWhapi(ProveedorWhatsApp):
             mensaje_id = msg.get("id", "")
             es_propio = msg.get("from_me", False)
 
+            # Ignorar mensajes de grupos (chat_id termina en @g.us)
+            if telefono.endswith("@g.us"):
+                continue
+
             # Nota de voz: Whapi puede enviar tipo 'voice', 'audio' o 'ptt'
             if tipo in ("audio", "ptt", "voice"):
                 datos_audio = msg.get(tipo, {})
