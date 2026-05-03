@@ -30,9 +30,9 @@ class ProveedorWhapi(ProveedorWhatsApp):
             mensaje_id = msg.get("id", "")
             es_propio = msg.get("from_me", False)
 
-            # Nota de voz (ptt = push-to-talk) o audio
-            if tipo in ("audio", "ptt"):
-                datos_audio = msg.get("audio", msg.get("ptt", {}))
+            # Nota de voz: Whapi puede enviar tipo 'voice', 'audio' o 'ptt'
+            if tipo in ("audio", "ptt", "voice"):
+                datos_audio = msg.get(tipo, {})
                 mensajes.append(MensajeEntrante(
                     telefono=telefono,
                     texto="",
