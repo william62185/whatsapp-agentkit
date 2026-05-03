@@ -36,7 +36,7 @@ class ProveedorWhapi(ProveedorWhatsApp):
                 audio_id = datos_audio.get("id", "")
                 # Whapi puede incluir 'link' directo o solo el 'id' del media
                 audio_url = datos_audio.get("link") or (
-                    f"https://gate.whapi.cloud/whatsapp/media/{audio_id}" if audio_id else ""
+                    f"https://gate.whapi.cloud/media/{audio_id}" if audio_id else ""
                 )
                 mensajes.append(MensajeEntrante(
                     telefono=telefono,

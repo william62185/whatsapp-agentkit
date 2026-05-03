@@ -41,6 +41,8 @@ async def descargar_audio(url: str, token: str) -> bytes:
     headers = {"Authorization": f"Bearer {token}"}
     async with httpx.AsyncClient(timeout=30) as client:
         r = await client.get(url, headers=headers)
+        if not r.is_success:
+            logger.error(f"Error descargando audio ({r.status_code}): {r.text[:300]}")
         r.raise_for_status()
         return r.content
 
