@@ -14,7 +14,12 @@ from groq import AsyncGroq
 
 logger = logging.getLogger("agentkit")
 
-cliente_groq = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
+
+def _obtener_cliente_groq() -> AsyncGroq:
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise ValueError("GROQ_API_KEY no está configurada en las variables de entorno")
+    return AsyncGroq(api_key=api_key)
 
 
 def _extension_desde_mime(mime_type: str) -> str:
@@ -49,6 +54,7 @@ async def transcribir_audio(audio_bytes: bytes, mime_type: str = "audio/ogg") ->
     nombre_archivo = f"audio.{extension}"
 
     try:
+        cliente_groq = _obtener_cliente_groq()
         transcripcion = await cliente_groq.audio.transcriptions.create(
             file=(nombre_archivo, io.BytesIO(audio_bytes)),
             model="whisper-large-v3",
