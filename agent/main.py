@@ -84,8 +84,13 @@ async def webhook_handler(request: Request):
                     transcripcion = await transcribir_audio(audio_bytes, msg.audio_mime)
                     logger.info(f"Transcripcion: {transcripcion[:100]}")
 
-                    # Generar pedido formateado
-                    pedido = await generar_pedido_desde_transcripcion(transcripcion)
+                    # Si hay pedido previo y la transcripcion suena a "agregar/modificar", actualizar
+                    historial_audio = await obtener_historial(msg.telefono)
+                    pedido_previo = _ultimo_pedido(historial_audio)
+                    if pedido_previo and _es_solicitud_update(transcripcion):
+                        pedido = await actualizar_pedido(transcripcion, pedido_previo)
+                    else:
+                        pedido = await generar_pedido_desde_transcripcion(transcripcion)
 
                     # Guardar en historial
                     await guardar_mensaje(msg.telefono, "user", f"[AUDIO] {transcripcion}")
