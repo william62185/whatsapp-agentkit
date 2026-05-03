@@ -8,7 +8,11 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import PlainTextResponse
 from dotenv import load_dotenv
 
-from agent.brain import generar_respuesta, generar_pedido_desde_transcripcion, actualizar_pedido, _es_solicitud_update, _ultimo_pedido
+from agent.brain import (
+    generar_respuesta, generar_pedido_desde_transcripcion, actualizar_pedido,
+    _es_solicitud_update, _ultimo_pedido, _transcripcion_pendiente,
+    _es_confirmacion_agregar, _es_confirmacion_nuevo,
+)
 from agent.memory import inicializar_db, guardar_mensaje, obtener_historial
 from agent.transcriber import descargar_audio, transcribir_audio
 from agent.providers import obtener_proveedor
@@ -84,21 +88,36 @@ async def webhook_handler(request: Request):
                     transcripcion = await transcribir_audio(audio_bytes, msg.audio_mime)
                     logger.info(f"Transcripcion: {transcripcion[:100]}")
 
-                    # Si hay pedido previo y la transcripcion suena a "agregar/modificar", actualizar
                     historial_audio = await obtener_historial(msg.telefono)
                     pedido_previo = _ultimo_pedido(historial_audio)
+
                     if pedido_previo and _es_solicitud_update(transcripcion):
+                        # Modificación explícita → actualizar directamente
                         pedido = await actualizar_pedido(transcripcion, pedido_previo)
+                        await guardar_mensaje(msg.telefono, "user", f"[AUDIO] {transcripcion}")
+                        await guardar_mensaje(msg.telefono, "assistant", pedido)
+                        await proveedor.enviar_mensaje(msg.telefono, pedido)
+                        logger.info(f"Pedido actualizado para {msg.telefono}")
+
+                    elif pedido_previo:
+                        # Nuevo audio sin keywords → preguntar al usuario
+                        await guardar_mensaje(msg.telefono, "user", f"[PENDIENTE] {transcripcion}")
+                        pregunta = (
+                            "Ya tienes un pedido en curso. ¿Qué quieres hacer?\n\n"
+                            "1️⃣ *Agregar* al pedido actual\n"
+                            "2️⃣ *Nuevo pedido* (reemplaza el anterior)"
+                        )
+                        await guardar_mensaje(msg.telefono, "assistant", pregunta)
+                        await proveedor.enviar_mensaje(msg.telefono, pregunta)
+                        logger.info(f"Confirmacion solicitada a {msg.telefono}")
+
                     else:
+                        # No hay pedido previo → crear nuevo directamente
                         pedido = await generar_pedido_desde_transcripcion(transcripcion)
-
-                    # Guardar en historial
-                    await guardar_mensaje(msg.telefono, "user", f"[AUDIO] {transcripcion}")
-                    await guardar_mensaje(msg.telefono, "assistant", pedido)
-
-                    # Enviar pedido al usuario
-                    await proveedor.enviar_mensaje(msg.telefono, pedido)
-                    logger.info(f"Pedido enviado a {msg.telefono}")
+                        await guardar_mensaje(msg.telefono, "user", f"[AUDIO] {transcripcion}")
+                        await guardar_mensaje(msg.telefono, "assistant", pedido)
+                        await proveedor.enviar_mensaje(msg.telefono, pedido)
+                        logger.info(f"Pedido nuevo para {msg.telefono}")
 
                 except Exception as e:
                     logger.error(f"Error procesando audio: {e}")
@@ -111,12 +130,31 @@ async def webhook_handler(request: Request):
             elif msg.texto:
                 logger.info(f"Mensaje de {msg.telefono}: {msg.texto}")
                 historial = await obtener_historial(msg.telefono)
+                pendiente = _transcripcion_pendiente(historial)
 
-                pedido_previo = _ultimo_pedido(historial)
-                if pedido_previo and _es_solicitud_update(msg.texto):
-                    respuesta = await actualizar_pedido(msg.texto, pedido_previo)
+                if pendiente and _es_confirmacion_agregar(msg.texto):
+                    # Usuario confirma agregar al pedido anterior
+                    pedido_previo = _ultimo_pedido(historial)
+                    respuesta = await actualizar_pedido(pendiente, pedido_previo)
+
+                elif pendiente and _es_confirmacion_nuevo(msg.texto):
+                    # Usuario quiere pedido nuevo
+                    respuesta = await generar_pedido_desde_transcripcion(pendiente)
+
+                elif pendiente:
+                    # Respuesta ambigua — volver a preguntar
+                    respuesta = (
+                        "No entendí bien. ¿Qué prefieres?\n\n"
+                        "1️⃣ *Agregar* al pedido actual\n"
+                        "2️⃣ *Nuevo pedido*"
+                    )
+
                 else:
-                    respuesta = await generar_respuesta(msg.texto, historial)
+                    pedido_previo = _ultimo_pedido(historial)
+                    if pedido_previo and _es_solicitud_update(msg.texto):
+                        respuesta = await actualizar_pedido(msg.texto, pedido_previo)
+                    else:
+                        respuesta = await generar_respuesta(msg.texto, historial)
 
                 await guardar_mensaje(msg.telefono, "user", msg.texto)
                 await guardar_mensaje(msg.telefono, "assistant", respuesta)

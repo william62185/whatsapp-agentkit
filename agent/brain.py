@@ -95,6 +95,16 @@ _PALABRAS_UPDATE = [
 ]
 
 
+_PALABRAS_CONFIRMAR_AGREGAR = [
+    "agrega", "agregar", "añade", "añadir", "adiciona", "adicionar",
+    "si", "sí", "yes", "1", "al mismo", "al pedido", "junto",
+]
+
+_PALABRAS_CONFIRMAR_NUEVO = [
+    "nuevo", "nueva", "no", "2", "aparte", "separado", "diferente", "otro pedido",
+]
+
+
 def _ultimo_pedido(historial: list[dict]) -> str | None:
     """Extrae el último pedido generado del historial de conversación."""
     for msg in reversed(historial):
@@ -103,10 +113,28 @@ def _ultimo_pedido(historial: list[dict]) -> str | None:
     return None
 
 
+def _transcripcion_pendiente(historial: list[dict]) -> str | None:
+    """Retorna la transcripción pendiente de confirmación, si existe."""
+    for msg in reversed(historial):
+        if msg["role"] == "user" and msg["content"].startswith("[PENDIENTE] "):
+            return msg["content"][len("[PENDIENTE] "):]
+    return None
+
+
 def _es_solicitud_update(mensaje: str) -> bool:
     """Detecta si el mensaje es una solicitud de modificación de pedido."""
     texto = mensaje.lower()
     return any(p in texto for p in _PALABRAS_UPDATE)
+
+
+def _es_confirmacion_agregar(mensaje: str) -> bool:
+    texto = mensaje.lower().strip()
+    return any(p in texto for p in _PALABRAS_CONFIRMAR_AGREGAR)
+
+
+def _es_confirmacion_nuevo(mensaje: str) -> bool:
+    texto = mensaje.lower().strip()
+    return any(p in texto for p in _PALABRAS_CONFIRMAR_NUEVO)
 
 
 async def actualizar_pedido(mensaje: str, pedido_anterior: str) -> str:
