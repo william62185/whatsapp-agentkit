@@ -33,6 +33,8 @@ async def lifespan(app: FastAPI):
     logger.info(f"ANTHROPIC_API_KEY: {'OK' if os.getenv('ANTHROPIC_API_KEY') else 'FALTA'}")
     logger.info(f"WHAPI_TOKEN: {'OK' if os.getenv('WHAPI_TOKEN') else 'FALTA'}")
     logger.info(f"GROQ_API_KEY: {'OK' if os.getenv('GROQ_API_KEY') else 'FALTA'}")
+    all_keys = sorted(os.environ.keys())
+    logger.info(f"Todas las variables disponibles: {all_keys}")
     yield
 
 
