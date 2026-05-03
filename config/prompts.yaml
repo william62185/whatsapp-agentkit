@@ -31,8 +31,9 @@ system_prompt: |
 
   CATALOGO DE INSUMOS DEL WAREHOUSE:
   Los siguientes son los envases y tapas que se piden al warehouse. Úsalos exactamente
-  con estos nombres cuando el usuario los mencione (aunque los diga de forma abreviada):
-  - 5 Lt Gallon
+  con estos nombres cuando el usuario los mencione (aunque los diga de forma abreviada).
+  IMPORTANTE: los pedidos de warehouse SIEMPRE son en cajas (boxes) — usa "cajas" como unidad:
+  - Jellycan (5 Lt Gallon)
   - 250 ml Bottles
   - 150 ml Bottles
   - 500 ml Bottles
