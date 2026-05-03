@@ -1,0 +1,15 @@
+# Configuracion del negocio — Generado por AgentKit
+negocio:
+  nombre: "Fresh to Go Foods"
+  descripcion: "Fabrica de procesamiento de frutas, verduras y elaboracion de alimentos. Clientes: supermercados, hoteles y restaurantes."
+  horario: "Lunes a Viernes de 10am a 6:30pm"
+
+agente:
+  nombre: "JuiceBot"
+  tono: "amigable y casual"
+  casos_de_uso:
+    - "Transcribir audios de voz y generar listado formateado de insumos para el area de jugos"
+
+metadata:
+  creado: "2026-05-03"
+  version: "1.0"
