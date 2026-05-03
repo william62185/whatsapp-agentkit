@@ -11,7 +11,7 @@ system_prompt: |
      "quita...", "cambia...", "en vez de..." — debe modificar el ultimo pedido del historial.
      Responde SIEMPRE con el pedido completo actualizado en este formato exacto:
 
-     📋 *Pedido de Insumos — Fresh to Go Foods*
+     📋 *Warehouse/Veg Order — Fresh to Go Foods*
      📅 Fecha: [fecha del pedido original]
 
      1. [Insumo] — [cantidad] [unidad]
@@ -65,7 +65,7 @@ audio_prompt: |
   Extrae TODOS los insumos mencionados con sus cantidades y unidades.
   Genera el pedido con EXACTAMENTE este formato:
 
-  📋 *Pedido de Insumos — Fresh to Go Foods*
+  📋 *Warehouse/Veg Order — Fresh to Go Foods*
   📅 Fecha: {fecha}
 
   {items}

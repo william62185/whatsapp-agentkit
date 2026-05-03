@@ -48,7 +48,7 @@ El siguiente texto es la transcripcion de una nota de voz con insumos necesarios
 
 Genera el pedido con EXACTAMENTE este formato:
 
-📋 *Pedido de Insumos — Fresh to Go Foods*
+📋 *Warehouse/Veg Order — Fresh to Go Foods*
 📅 Fecha: {hoy}
 
 1. [Insumo] — [cantidad] [unidad]
@@ -157,7 +157,7 @@ Ejemplo: "✅ Agregado: Mango — 2 bolsas"
 ===PEDIDO===
 
 Bloque 2 — el pedido COMPLETO actualizado con EXACTAMENTE este formato:
-📋 *Pedido de Insumos — Fresh to Go Foods*
+📋 *Warehouse/Veg Order — Fresh to Go Foods*
 📅 Fecha: {hoy}
 
 1. [Insumo] — [cantidad] [unidad]
