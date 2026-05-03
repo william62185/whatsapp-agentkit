@@ -32,7 +32,7 @@ system_prompt: |
   CATALOGO DE INSUMOS DEL WAREHOUSE:
   Los siguientes son los envases y tapas que se piden al warehouse. Úsalos exactamente
   con estos nombres cuando el usuario los mencione (aunque los diga de forma abreviada).
-  IMPORTANTE: los pedidos de warehouse SIEMPRE son en cajas (boxes) — usa "cajas" como unidad:
+  IMPORTANTE: los pedidos de warehouse SIEMPRE son en boxes — usa "boxes" como unidad:
   - Jellycan (5 Lt Gallon)
   - 250 ml Bottles
   - 150 ml Bottles
@@ -68,7 +68,9 @@ audio_prompt: |
   REGLAS PARA LOS ITEMS:
   - Formato de cada linea: `[numero]. [Insumo] — [cantidad] [unidad]`
   - Si no se menciona cantidad, usa "? [unidad mas probable]"
-  - Unidades validas: kg, lb, unidades, cajas, bolsas, litros, galones
+  - Unidades SIEMPRE en inglés:
+      kg, lb, Lt, box/boxes, bag/bags, pc/pcs, unit/units, gallon/gallons
+    NUNCA usar: cajas, bolsas, piezas, unidades, litros, galones
   - Escribe los nombres de productos EXACTAMENTE como los dijo el usuario — no los traduzcas
     Ejemplos: "Green Apple", "Pineapple", "Ginger", "Mango", "Strawberry"
   - El usuario puede hablar en español, inglés o mezcla — interpreta todo correctamente
