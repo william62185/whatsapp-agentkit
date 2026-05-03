@@ -93,9 +93,11 @@ async def webhook_handler(request: Request):
 
                     if pedido_previo and _es_solicitud_update(transcripcion):
                         # Modificación explícita → actualizar directamente
-                        pedido = await actualizar_pedido(transcripcion, pedido_previo)
+                        resumen, pedido = await actualizar_pedido(transcripcion, pedido_previo)
                         await guardar_mensaje(msg.telefono, "user", f"[AUDIO] {transcripcion}")
                         await guardar_mensaje(msg.telefono, "assistant", pedido)
+                        if resumen:
+                            await proveedor.enviar_mensaje(msg.telefono, resumen)
                         await proveedor.enviar_mensaje(msg.telefono, pedido)
                         logger.info(f"Pedido actualizado para {msg.telefono}")
 
@@ -133,33 +135,50 @@ async def webhook_handler(request: Request):
                 pendiente = _transcripcion_pendiente(historial)
 
                 if pendiente and _es_confirmacion_agregar(msg.texto):
-                    # Usuario confirma agregar al pedido anterior
                     pedido_previo = _ultimo_pedido(historial)
-                    respuesta = await actualizar_pedido(pendiente, pedido_previo)
+                    resumen, respuesta = await actualizar_pedido(pendiente, pedido_previo)
+                    await guardar_mensaje(msg.telefono, "user", msg.texto)
+                    await guardar_mensaje(msg.telefono, "assistant", respuesta)
+                    if resumen:
+                        await proveedor.enviar_mensaje(msg.telefono, resumen)
+                    await proveedor.enviar_mensaje(msg.telefono, respuesta)
+                    logger.info(f"Pedido unido para {msg.telefono}")
+                    continue
 
                 elif pendiente and _es_confirmacion_nuevo(msg.texto):
-                    # Usuario quiere pedido nuevo
                     respuesta = await generar_pedido_desde_transcripcion(pendiente)
+                    await guardar_mensaje(msg.telefono, "user", msg.texto)
+                    await guardar_mensaje(msg.telefono, "assistant", respuesta)
+                    await proveedor.enviar_mensaje(msg.telefono, respuesta)
+                    logger.info(f"Pedido nuevo para {msg.telefono}")
+                    continue
 
                 elif pendiente:
-                    # Respuesta ambigua — volver a preguntar
                     respuesta = (
                         "No entendí bien. ¿Qué prefieres?\n\n"
                         "1️⃣ *Agregar* al pedido actual\n"
                         "2️⃣ *Nuevo pedido*"
                     )
+                    await guardar_mensaje(msg.telefono, "user", msg.texto)
+                    await guardar_mensaje(msg.telefono, "assistant", respuesta)
+                    await proveedor.enviar_mensaje(msg.telefono, respuesta)
+                    continue
 
                 else:
                     pedido_previo = _ultimo_pedido(historial)
                     if pedido_previo and _es_solicitud_update(msg.texto):
-                        respuesta = await actualizar_pedido(msg.texto, pedido_previo)
+                        resumen, respuesta = await actualizar_pedido(msg.texto, pedido_previo)
+                        await guardar_mensaje(msg.telefono, "user", msg.texto)
+                        await guardar_mensaje(msg.telefono, "assistant", respuesta)
+                        if resumen:
+                            await proveedor.enviar_mensaje(msg.telefono, resumen)
+                        await proveedor.enviar_mensaje(msg.telefono, respuesta)
                     else:
                         respuesta = await generar_respuesta(msg.texto, historial)
-
-                await guardar_mensaje(msg.telefono, "user", msg.texto)
-                await guardar_mensaje(msg.telefono, "assistant", respuesta)
-                await proveedor.enviar_mensaje(msg.telefono, respuesta)
-                logger.info(f"Respuesta a {msg.telefono}: {respuesta}")
+                        await guardar_mensaje(msg.telefono, "user", msg.texto)
+                        await guardar_mensaje(msg.telefono, "assistant", respuesta)
+                        await proveedor.enviar_mensaje(msg.telefono, respuesta)
+                    logger.info(f"Respuesta a {msg.telefono}: {respuesta}")
 
         return {"status": "ok"}
 

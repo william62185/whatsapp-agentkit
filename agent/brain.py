@@ -137,10 +137,10 @@ def _es_confirmacion_nuevo(mensaje: str) -> bool:
     return any(p in texto for p in _PALABRAS_CONFIRMAR_NUEVO)
 
 
-async def actualizar_pedido(mensaje: str, pedido_anterior: str) -> str:
+async def actualizar_pedido(mensaje: str, pedido_anterior: str) -> tuple[str, str]:
     """
     Modifica el pedido anterior según la instrucción del usuario.
-    Devuelve el pedido completo actualizado con el mismo formato.
+    Devuelve (resumen_cambios, pedido_completo_actualizado).
     """
     hoy = date.today().strftime("%d/%m/%Y")
     prompt = f"""Tienes este pedido de insumos:
@@ -149,14 +149,26 @@ async def actualizar_pedido(mensaje: str, pedido_anterior: str) -> str:
 
 El usuario pide: "{mensaje}"
 
-Aplica el cambio y devuelve el pedido COMPLETO con EXACTAMENTE el mismo formato.
+Responde en DOS bloques separados por la línea ===PEDIDO===
+
+Bloque 1 — resumen breve de los cambios (máximo 3 líneas, sin formato especial):
+Ejemplo: "✅ Agregado: Mango — 2 bolsas"
+
+===PEDIDO===
+
+Bloque 2 — el pedido COMPLETO actualizado con EXACTAMENTE este formato:
+📋 *Pedido de Insumos — Fresh to Go Foods*
+📅 Fecha: {hoy}
+
+1. [Insumo] — [cantidad] [unidad]
+...
+
+---
+_JuiceBot — Area de Jugos_ 🤖
+
 Reglas:
 - Mantén TODOS los items que no se mencionan
-- Si dice "agrega" o "también" → añade el item nuevo
-- Si dice "quita" o "elimina" → elimina ese item
-- Si dice "cambia X por Y" o "en vez de X" → modifica el item
 - Renumera los items si es necesario
-- Mantén la misma fecha ({hoy})
 """
     try:
         client = _obtener_cliente()
@@ -165,11 +177,17 @@ Reglas:
             max_tokens=1024,
             messages=[{"role": "user", "content": prompt}]
         )
-        return response.content[0].text
+        texto = response.content[0].text
+        partes = texto.split("===PEDIDO===", 1)
+        if len(partes) == 2:
+            return partes[0].strip(), partes[1].strip()
+        # Si Claude no usó el separador, devolver todo como pedido sin resumen
+        return "", texto.strip()
     except Exception as e:
         logger.error(f"Error Claude API (actualizar pedido): {e}")
         config = _cargar_prompts()
-        return config.get("error_message", "Tuve un problema tecnico. Intenta de nuevo en un momento.")
+        msg_error = config.get("error_message", "Tuve un problema tecnico. Intenta de nuevo en un momento.")
+        return "", msg_error
 
 
 async def generar_respuesta(mensaje: str, historial: list[dict]) -> str:
