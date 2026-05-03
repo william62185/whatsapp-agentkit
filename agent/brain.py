@@ -78,9 +78,21 @@ TRANSCRIPCION:
         return config.get("error_message", "Tuve un problema generando el pedido. Intenta de nuevo.")
 
 
-_PALABRAS_UPDATE = ["agrega", "añade", "anade", "quita", "elimina", "cambia", "modifica",
-                    "tambien", "también", "falta", "mas ", "más ", "en vez", "en lugar",
-                    "borra", "saca", "aumenta", "reduce", "menos", "agréga"]
+_PALABRAS_UPDATE = [
+    # agregar
+    "agrega", "agregar", "agréga", "añade", "añadir", "anade", "anadir",
+    "adiciona", "adicionar", "incluye", "incluir", "suma", "sumar",
+    "tambien", "también", "ademas", "además", "mas ", "más ",
+    # quitar
+    "quita", "quitar", "elimina", "eliminar", "borra", "borrar",
+    "saca", "sacar", "remueve", "remover", "descarta", "descartar",
+    # modificar
+    "cambia", "cambiar", "modifica", "modificar", "actualiza", "actualizar",
+    "corrige", "corregir", "en vez", "en lugar", "reemplaza", "reemplazar",
+    # cantidad
+    "aumenta", "aumentar", "reduce", "reducir", "menos ", "sube ", "baja ",
+    "falta", "faltan",
+]
 
 
 def _ultimo_pedido(historial: list[dict]) -> str | None:

@@ -113,14 +113,7 @@ async def webhook_handler(request: Request):
                 historial = await obtener_historial(msg.telefono)
 
                 pedido_previo = _ultimo_pedido(historial)
-                es_update = _es_solicitud_update(msg.texto)
-                logger.info(f"es_update={es_update} tiene_pedido={pedido_previo is not None} historial_len={len(historial)}")
-                if historial:
-                    roles = [m['role'] for m in historial]
-                    snippets = [m['content'][:60] for m in historial]
-                    logger.info(f"historial roles: {roles}")
-                    logger.info(f"historial snippets: {snippets}")
-                if pedido_previo and es_update:
+                if pedido_previo and _es_solicitud_update(msg.texto):
                     respuesta = await actualizar_pedido(msg.texto, pedido_previo)
                 else:
                     respuesta = await generar_respuesta(msg.texto, historial)
