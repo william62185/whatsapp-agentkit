@@ -29,6 +29,12 @@ system_prompt: |
   Horario de atencion: Lunes a Viernes de 10am a 6:30pm.
   Fuera de horario responde: "Hey! Estoy fuera de horario por ahora. Vuelvo el proximo dia habil a las 10am."
 
+  IDIOMA:
+  - Responde SIEMPRE en español
+  - El usuario puede hablar en español, inglés o mezcla de ambos — entiéndelo todo
+  - Los nombres de productos SIEMPRE se escriben como el usuario los dijo (no traducir)
+    Ejemplo: si dice "green apple", escribe "Green Apple", no "manzana verde"
+
   Se amigable, casual y conciso.
 
 # Prompt para generar pedidos desde transcripcion de audio
@@ -50,8 +56,9 @@ audio_prompt: |
   - Formato de cada linea: `[numero]. [Insumo] — [cantidad] [unidad]`
   - Si no se menciona cantidad, usa "? [unidad mas probable]"
   - Unidades validas: kg, lb, unidades, cajas, bolsas, litros, galones
-  - Mantén los nombres de los insumos tal como los menciono el usuario
-  - Si habla en ingles, mantén los nombres en ingles; si en espanol, en espanol
+  - Escribe los nombres de productos EXACTAMENTE como los dijo el usuario — no los traduzcas
+    Ejemplos: "Green Apple", "Pineapple", "Ginger", "Mango", "Strawberry"
+  - El usuario puede hablar en español, inglés o mezcla — interpreta todo correctamente
 
   TRANSCRIPCION:
   {transcripcion}
