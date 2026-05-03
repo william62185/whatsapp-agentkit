@@ -20,8 +20,6 @@ class ProveedorWhapi(ProveedorWhatsApp):
     async def parsear_webhook(self, request: Request) -> list[MensajeEntrante]:
         """Parsea el payload de Whapi.cloud, incluyendo mensajes de audio."""
         body = await request.json()
-        logger.info(f"Whapi payload keys: {list(body.keys())}")
-        logger.info(f"Whapi payload: {str(body)[:500]}")
         mensajes = []
 
         for msg in body.get("messages", []):
