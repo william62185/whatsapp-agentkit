@@ -4,8 +4,14 @@ services:
     build: .
     ports:
       - "${PORT:-8000}:8000"
-    env_file:
-      - .env
+    environment:
+      - ANTHROPIC_API_KEY
+      - WHAPI_TOKEN
+      - GROQ_API_KEY
+      - WHATSAPP_PROVIDER
+      - DATABASE_URL
+      - PORT
+      - ENVIRONMENT
     volumes:
       - ./knowledge:/app/knowledge
       - ./config:/app/config
