@@ -30,6 +30,9 @@ async def lifespan(app: FastAPI):
     logger.info("Base de datos inicializada")
     logger.info(f"Servidor JuiceBot corriendo en puerto {PORT}")
     logger.info(f"Proveedor de WhatsApp: {proveedor.__class__.__name__}")
+    logger.info(f"ANTHROPIC_API_KEY: {'OK' if os.getenv('ANTHROPIC_API_KEY') else 'FALTA'}")
+    logger.info(f"WHAPI_TOKEN: {'OK' if os.getenv('WHAPI_TOKEN') else 'FALTA'}")
+    logger.info(f"GROQ_API_KEY: {'OK' if os.getenv('GROQ_API_KEY') else 'FALTA'}")
     yield
 
 

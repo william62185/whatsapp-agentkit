@@ -33,13 +33,18 @@ class ProveedorWhapi(ProveedorWhatsApp):
             # Nota de voz: Whapi puede enviar tipo 'voice', 'audio' o 'ptt'
             if tipo in ("audio", "ptt", "voice"):
                 datos_audio = msg.get(tipo, {})
+                audio_id = datos_audio.get("id", "")
+                # Whapi puede incluir 'link' directo o solo el 'id' del media
+                audio_url = datos_audio.get("link") or (
+                    f"https://gate.whapi.cloud/whatsapp/media/{audio_id}" if audio_id else ""
+                )
                 mensajes.append(MensajeEntrante(
                     telefono=telefono,
                     texto="",
                     mensaje_id=mensaje_id,
                     es_propio=es_propio,
                     es_audio=True,
-                    audio_url=datos_audio.get("link", ""),
+                    audio_url=audio_url,
                     audio_mime=datos_audio.get("mime_type", "audio/ogg"),
                 ))
 
