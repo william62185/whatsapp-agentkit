@@ -78,6 +78,60 @@ TRANSCRIPCION:
         return config.get("error_message", "Tuve un problema generando el pedido. Intenta de nuevo.")
 
 
+_PALABRAS_UPDATE = ["agrega", "añade", "anade", "quita", "elimina", "cambia", "modifica",
+                    "tambien", "también", "falta", "mas ", "más ", "en vez", "en lugar",
+                    "borra", "saca", "aumenta", "reduce", "menos", "agréga"]
+
+
+def _ultimo_pedido(historial: list[dict]) -> str | None:
+    """Extrae el último pedido generado del historial de conversación."""
+    for msg in reversed(historial):
+        if msg["role"] == "assistant" and "Pedido de Insumos" in msg["content"]:
+            return msg["content"]
+    return None
+
+
+def _es_solicitud_update(mensaje: str) -> bool:
+    """Detecta si el mensaje es una solicitud de modificación de pedido."""
+    texto = mensaje.lower()
+    return any(p in texto for p in _PALABRAS_UPDATE)
+
+
+async def actualizar_pedido(mensaje: str, pedido_anterior: str) -> str:
+    """
+    Modifica el pedido anterior según la instrucción del usuario.
+    Devuelve el pedido completo actualizado con el mismo formato.
+    """
+    hoy = date.today().strftime("%d/%m/%Y")
+    prompt = f"""Tienes este pedido de insumos:
+
+{pedido_anterior}
+
+El usuario pide: "{mensaje}"
+
+Aplica el cambio y devuelve el pedido COMPLETO con EXACTAMENTE el mismo formato.
+Reglas:
+- Mantén TODOS los items que no se mencionan
+- Si dice "agrega" o "también" → añade el item nuevo
+- Si dice "quita" o "elimina" → elimina ese item
+- Si dice "cambia X por Y" o "en vez de X" → modifica el item
+- Renumera los items si es necesario
+- Mantén la misma fecha ({hoy})
+"""
+    try:
+        client = _obtener_cliente()
+        response = await client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.content[0].text
+    except Exception as e:
+        logger.error(f"Error Claude API (actualizar pedido): {e}")
+        config = _cargar_prompts()
+        return config.get("error_message", "Tuve un problema tecnico. Intenta de nuevo en un momento.")
+
+
 async def generar_respuesta(mensaje: str, historial: list[dict]) -> str:
     """Genera respuesta para mensajes de texto normales."""
     config = _cargar_prompts()

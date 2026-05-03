@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import PlainTextResponse
 from dotenv import load_dotenv
 
-from agent.brain import generar_respuesta, generar_pedido_desde_transcripcion
+from agent.brain import generar_respuesta, generar_pedido_desde_transcripcion, actualizar_pedido, _es_solicitud_update, _ultimo_pedido
 from agent.memory import inicializar_db, guardar_mensaje, obtener_historial
 from agent.transcriber import descargar_audio, transcribir_audio
 from agent.providers import obtener_proveedor
@@ -106,7 +106,13 @@ async def webhook_handler(request: Request):
             elif msg.texto:
                 logger.info(f"Mensaje de {msg.telefono}: {msg.texto}")
                 historial = await obtener_historial(msg.telefono)
-                respuesta = await generar_respuesta(msg.texto, historial)
+
+                pedido_previo = _ultimo_pedido(historial)
+                if pedido_previo and _es_solicitud_update(msg.texto):
+                    respuesta = await actualizar_pedido(msg.texto, pedido_previo)
+                else:
+                    respuesta = await generar_respuesta(msg.texto, historial)
+
                 await guardar_mensaje(msg.telefono, "user", msg.texto)
                 await guardar_mensaje(msg.telefono, "assistant", respuesta)
                 await proveedor.enviar_mensaje(msg.telefono, respuesta)
