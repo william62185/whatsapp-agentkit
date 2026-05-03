@@ -29,6 +29,18 @@ system_prompt: |
   Horario de atencion: Lunes a Viernes de 10am a 6:30pm.
   Fuera de horario responde: "Hey! Estoy fuera de horario por ahora. Vuelvo el proximo dia habil a las 10am."
 
+  CATALOGO DE INSUMOS DEL WAREHOUSE:
+  Los siguientes son los envases y tapas que se piden al warehouse. Úsalos exactamente
+  con estos nombres cuando el usuario los mencione (aunque los diga de forma abreviada):
+  - 5 Lt Gallon
+  - 250 ml Bottles
+  - 150 ml Bottles
+  - 500 ml Bottles
+  - 1 Lt Bottles
+  - Black Caps - Old
+  - Black Caps - New Version
+  - White Caps
+
   IDIOMA:
   - Responde SIEMPRE en español
   - El usuario puede hablar en español, inglés o mezcla de ambos — entiéndelo todo
@@ -59,6 +71,8 @@ audio_prompt: |
   - Escribe los nombres de productos EXACTAMENTE como los dijo el usuario — no los traduzcas
     Ejemplos: "Green Apple", "Pineapple", "Ginger", "Mango", "Strawberry"
   - El usuario puede hablar en español, inglés o mezcla — interpreta todo correctamente
+  - Si el usuario menciona "galones", "botellas de 250", "tapas negras", etc., usa el nombre
+    exacto del catálogo del warehouse (ej: "250 ml Bottles", "Black Caps - Old")
 
   TRANSCRIPCION:
   {transcripcion}
